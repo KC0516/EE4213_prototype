@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>After Exercise Snack Prototype</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6a11cb,#2575fc 50%,#ff6ec4);padding:16px}
+.phone{width:380px;height:760px;max-height:96vh;background:#fff;border-radius:38px;box-shadow:0 25px 60px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column;border:8px solid #1b1b2f;position:relative}
+.status{display:flex;justify-content:space-between;padding:10px 22px 0;font-size:12px;font-weight:700;color:#333}
+.top{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.back{border:none;background:#eef;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer}
+.dots{display:flex;gap:6px;flex:1;justify-content:center;margin-right:30px}
+.dot{width:20px;height:20px;border-radius:50%;background:#e6e8f5;font-size:10px;display:flex;align-items:center;justify-content:center;color:#999;font-weight:700;transition:.3s}
+.dot.on{background:linear-gradient(135deg,#ff7a18,#ff3d77);color:#fff;transform:scale(1.1)}
+.body{flex:1;overflow-y:auto;padding:4px 18px 10px}
+h1{font-size:25px;margin:4px 0 12px;color:#6a11cb}
+h4{font-size:12px;color:#6a5acd;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.5px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{flex:1;min-width:70px;padding:9px 6px;border:none;border-radius:20px;background:#eef0fb;font-size:13px;cursor:pointer;transition:.2s;color:#444}
+.chip:hover{transform:translateY(-2px)}
+.chip.sel{background:linear-gradient(135deg,#36d1dc,#5b86e5);color:#fff;font-weight:700;box-shadow:0 4px 10px rgba(91,134,229,.45)}
+.hunger{display:flex;justify-content:space-between;align-items:center}
+.h{width:42px;height:42px;border-radius:50%;border:2px solid #ccd;background:#fff;cursor:pointer;font-size:15px;font-weight:700;color:#777}
+.h.sel{background:linear-gradient(135deg,#f7971e,#ff3d77);color:#fff;border-color:transparent;transform:scale(1.12)}
+.hl{display:flex;justify-content:space-between;font-size:10px;color:#999;margin-top:3px}
+.foot{padding:6px 18px}
+.btnrow{display:flex;gap:8px}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;transition:.2s}
+.btn:active{transform:scale(.97)}
+.p{background:linear-gradient(90deg,#11998e,#38ef7d);color:#fff;box-shadow:0 6px 14px rgba(17,153,142,.4)}
+.s{background:#fff;border:2px solid #5b86e5;color:#5b86e5}
+.link{background:none;border:none;color:#888;font-size:13px;width:100%;padding:8px;cursor:pointer}
+.note{font-size:10px;text-align:center;color:#aaa;padding:2px 0 10px}
+.card{border-radius:18px;padding:16px;margin-bottom:12px}
+.rec{background:linear-gradient(135deg,#ffe259,#ffa751)}
+.rec small{font-size:10px;font-weight:700;letter-spacing:1px;color:#8a4b00}
+.rec h3{font-size:19px;margin:6px 0;color:#4a2500}
+.rec p{font-size:11px;color:#6b3a00}
+.time{background:#e8f7ff;display:flex;align-items:center;gap:12px;font-size:13px;color:#055}
+.pulse{width:26px;height:26px;border-radius:50%;background:#00c6ff;animation:p 1.4s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(0,198,255,.6)}100%{box-shadow:0 0 0 14px rgba(0,198,255,0)}}
+.row{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid #f0f0f5;border-radius:12px}
+.row.pick{background:#fff6d6}
+.em{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px}
+.nm{flex:1;font-size:14px;font-weight:700}.nm small{display:block;font-weight:400;color:#999;font-size:11px}
+.pr{font-weight:800;color:#e0245e;font-size:13px}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:16px;padding:10px 0}
+.why{font-size:11px;color:#777;background:#f3f0ff;padding:8px;border-radius:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.tag{padding:9px;border-radius:20px;font-size:12px;text-align:center;font-weight:700;color:#fff}
+.t0{background:#ff6b6b}.t1{background:#4facfe}.t2{background:#f9a826}.t3{background:#a259ff}
+.hero{height:100px;border-radius:16px;margin-top:12px;background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a1c4fd);display:flex;align-items:center;justify-content:center;font-size:44px}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:28px;height:28px;border-radius:50%;border:none;background:#eef0fb;font-size:16px;cursor:pointer;font-weight:800}
+.sw{background:none;border:none;font-size:20px;cursor:pointer}
+.modal{background:#f3f0ff;text-align:center}
+.modal h3{font-size:15px;margin-bottom:6px}
+textarea{width:100%;height:90px;border-radius:14px;border:2px solid #e0e3f5;padding:10px;font-size:13px;resize:none}
+.toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.fade{animation:f .35s}@keyframes f{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.done{text-align:center;padding-top:60px}.done .big{font-size:80px}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="status"><span>9:41</span><span>● ● ▭</span></div>
+  <div class="top"><button class="back" data-a="back">←</button><div class="dots" id="dots"></div></div>
+  <div class="body" id="body"></div>
+  <div class="foot" id="foot"></div>
+  <div class="note">Sample data for illustration only — not nutritional advice.</div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+var CAT = {
+  yogurt:{n:"Yogurt (low-fat)",u:"1 cup",e:"🥛",c:"#d6f0ff",pr:12,P:8,C:12,F:2,S:10},
+  banana:{n:"Banana",u:"1 piece",e:"🍌",c:"#fff3b0",pr:5,P:1,C:27,F:0,S:14},
+  bread:{n:"Bread roll",u:"1 roll",e:"🥖",c:"#ffe0c2",pr:8,P:3,C:27,F:3,S:3},
+  milk:{n:"Milk",u:"1 cup",e:"🥤",c:"#e8ecff",pr:10,P:8,C:12,F:4,S:12},
+  apple:{n:"Apple",u:"1 piece",e:"🍎",c:"#ffd6d6",pr:6,P:0,C:25,F:0,S:19},
+  oat:{n:"Oat bar",u:"1 bar",e:"🍫",c:"#e6d5c0",pr:9,P:3,C:20,F:5,S:8}
+};
+var NUT = {P:"Protein",C:"Carbs",F:"Fat",S:"Sugar"};
+function defItems(){return [{id:"yogurt",q:1},{id:"banana",q:1},{id:"bread",q:1}];}
+var S = {step:1,act:"Gym",dur:"30",int:"Medium",since:"15–30m",now:"Before 9 pm",hunger:3,
+         items:defItems(),pick:-1,show:[],feel:"About right",note:""};
+
+function $(id){return document.getElementById(id);}
+function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function toast(t){var x=$("toast");x.textContent=t;x.classList.add("show");setTimeout(function(){x.classList.remove("show");},1800);}
+
+function chips(key,opts){
+  return '<div class="chips">'+opts.map(function(o){
+    return '<button class="chip'+(String(S[key])===String(o)?' sel':'')+'" data-a="set" data-k="'+key+'" data-v="'+esc(o)+'">'+esc(o)+'</button>';
+  }).join("")+'</div>';
+}
+function totals(){
+  var t={pr:0,P:0,C:0,F:0,S:0};
+  S.items.forEach(function(i){var c=CAT[i.id];for(var k in t){t[k]+=c[k]*i.q;}});
+  return t;
+}
+function advice(){
+  var heavy = S.int==="High" || parseInt(S.dur)>=45;
+  if(S.hunger<=2 && !heavy) return {t:"Water may be enough",d:"Short, easy session and low hunger."};
+  return {t:"A light snack may help, or water may be enough",d:heavy?"Longer or harder effort — protein + carbs can help.":"Moderate effort and some hunger."};
+}
+
+function render(){
+  $("dots").innerHTML=[1,2,3,4,5,6].map(function(i){return '<div class="dot'+(i<=S.step?' on':'')+'">'+i+'</div>';}).join("");
+  var h="",ft="",t=totals();
+
+  if(S.step===1){
+    h='<h1>After exercise</h1>'+
+      '<h4>Activity</h4>'+chips("act",["Gym","Sport","Hike","Walk"])+
+      '<h4>Duration (min)</h4>'+chips("dur",["15","30","45","60+"])+
+      '<h4>Intensity</h4>'+chips("int",["Low","Medium","High"])+
+      '<h4>Time since exercise</h4>'+chips("since",["<15m","15–30m","30–60m","60m+"])+
+      '<h4>Time now</h4>'+chips("now",["Before 9 pm","After 9 pm"])+
+      '<h4>Hunger level</h4><div class="hunger">'+[1,2,3,4,5].map(function(i){
+        return '<button class="h'+(S.hunger===i?' sel':'')+'" data-a="hunger" data-v="'+i+'">'+i+'</button>';}).join("")+
+      '</div><div class="hl"><span>Not hungry</span><span>Very hungry</span></div>';
+    ft='<button class="btn p" data-a="go" data-v="2">CONTINUE</button>';
+  }
+  else if(S.step===2){
+    var a=advice();
+    h='<h1>Today\'s check</h1>'+
+      '<div class="card rec"><small>RECOMMENDATION</small><h3>AI-assisted suggestion (sample)</h3><h3 style="font-size:16px">'+a.t+'</h3>'+
+      '<p>Based on: '+esc(S.dur)+' min, '+S.int.toLowerCase()+' effort, hunger '+S.hunger+' of 5. '+a.d+'</p></div>'+
+      '<div class="card time"><div class="pulse"></div><div>Time since exercise<br><b>'+esc(S.since)+'</b> · '+esc(S.now)+'</div></div>'+
+      '<div class="hero">🏃‍♂️💧</div>';
+    ft='<div class="btnrow"><button class="btn p" data-a="go" data-v="3">Show food ideas</button><button class="btn s" data-a="water">Water is enough for me</button></div>'+
+       '<button class="btn s" data-a="go" data-v="1">ADJUST MANUALLY</button>';
+  }
+  else if(S.step===3){
+    h='<h1>Suggested combination</h1><p style="font-size:11px;color:#888;margin-bottom:6px">Sample combination — adjust anytime.</p>'+
+      S.items.map(function(i){var c=CAT[i.id];
+        return '<div class="row"><div class="em" style="background:'+c.c+'">'+c.e+'</div><div class="nm">'+c.n+'<small>'+i.q+' × '+c.u+'</small></div><div class="pr">HK$'+(c.pr*i.q)+'</div></div>';}).join("")+
+      '<div class="tot"><span>Total</span><span style="color:#e0245e">HK$'+t.pr+'</span></div>'+
+      '<div class="why">Why: adds bread so it feels more filling than yogurt and banana alone.</div>'+
+      '<h4>Trade-offs</h4><div class="grid"><div class="tag t0">Fullness: '+((t.C+t.P)>50?'High':'Medium')+'</div><div class="tag t1">Protein: '+t.P+'g</div><div class="tag t2">Carbs: '+t.C+'g</div><div class="tag t3">Fat: '+t.F+'g</div></div>'+
+      '<div class="hero" style="background:linear-gradient(135deg,#f6d365,#fda085)">'+S.items.map(function(i){return CAT[i.id].e;}).join(" ")+'</div>';
+    ft='<button class="btn p" data-a="go" data-v="5">LOOKS GOOD</button><button class="btn s" data-a="go" data-v="4">EDIT</button><button class="link" data-a="notme">Not for me</button>';
+  }
+  else if(S.step===4){
+    h='<h1>Edit your choice</h1>'+
+      S.items.map(function(i,k){var c=CAT[i.id];
+        return '<div class="row'+(S.pick===k?' pick':'')+'"><div class="em" style="background:'+c.c+'">'+c.e+'</div><div class="nm">'+c.n+'</div>'+
+        '<div class="step"><button data-a="qty" data-k="'+k+'" data-v="-1">−</button><b>'+i.q+'</b><button data-a="qty" data-k="'+k+'" data-v="1">+</button></div>'+
+        '<button class="sw" data-a="pick" data-v="'+k+'">⇄</button></div>';}).join("")+
+      '<div class="tot"><span>Total</span><span style="color:#e0245e">HK$'+t.pr+'</span></div><p style="font-size:10px;text-align:center;color:#999">Totals update as you edit.</p>'+
+      '<h4>Swap items (tap ⇄ first)</h4><div class="chips">'+["milk","apple","oat"].map(function(k){return '<button class="chip" data-a="swap" data-v="'+k+'">'+CAT[k].n+'</button>';}).join("")+'</div>'+
+      '<div class="card modal" style="margin-top:12px"><h3>Show me</h3><p style="font-size:11px;color:#888">PICK UP TO 3</p><div class="chips" style="margin-top:6px">'+
+      Object.keys(NUT).map(function(k){return '<button class="chip'+(S.show.indexOf(k)>=0?' sel':'')+'" data-a="tg" data-v="'+k+'">'+NUT[k]+'</button>';}).join("")+'</div>'+
+      (S.show.length?'<div class="grid">'+S.show.map(function(k,n){return '<div class="tag t'+n+'">'+NUT[k]+': '+t[k]+'g</div>';}).join("")+'</div>':'')+'</div>';
+    ft='<button class="btn p" data-a="go" data-v="3">DONE</button><button class="btn s" data-a="reset">RESET</button>';
+  }
+  else if(S.step===5){
+    h='<h1>Your list (mock)</h1><div class="card" style="background:#f6f4ff">'+
+      S.items.map(function(i){var c=CAT[i.id];return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0"><span>'+c.e+' '+c.n+'</span><span>x'+i.q+'</span><b>HK$'+(c.pr*i.q)+'</b></div>';}).join("")+
+      '<hr style="margin:8px 0;border:none;border-top:1px solid #ddd"><div class="tot" style="padding:0"><span>Total</span><span style="color:#e0245e">HK$'+t.pr+'</span></div></div>'+
+      '<div class="card modal"><h3>Add these '+S.items.length+' items to your mock list?</h3>'+
+      '<button class="btn p" data-a="confirm">CONFIRM</button><button class="btn s" data-a="go" data-v="3">CANCEL</button></div>';
+    ft='';
+  }
+  else if(S.step===6){
+    h='<h1>After eating</h1><h4>How do you feel?</h4>'+chips("feel",["Not enough","About right","Too much"])+
+      '<h4>Anything to remember? (optional)</h4><textarea id="note" placeholder="e.g. Bread helped me feel full">'+esc(S.note)+'</textarea>'+
+      '<p style="font-size:10px;color:#999;text-align:center;margin-top:6px">Your note is only a reminder for you. It is not advice.</p><div class="hero" style="background:linear-gradient(135deg,#84fab0,#8fd3f4)">😋</div>';
+    ft='<button class="btn p" data-a="save">SAVE NOTE</button><button class="link" data-a="skip">SKIP</button>';
+  }
+  else {
+    h='<div class="done"><div class="big">🎉</div><h1>All done!</h1><p style="color:#666;font-size:14px">Feeling: <b>'+esc(S.feel)+'</b><br>'+(S.note?'Note: '+esc(S.note):'No note saved.')+'</p></div>';
+    ft='<button class="btn p" data-a="restart">START OVER</button>';
+  }
+  $("body").innerHTML='<div class="fade">'+h+'</div>';
+  $("foot").innerHTML=ft;
+}
+
+document.getElementById("phone").addEventListener("click",function(e){
+  var el=e.target.closest("[data-a]"); if(!el) return;
+  var a=el.getAttribute("data-a"), v=el.getAttribute("data-v"), k=el.getAttribute("data-k");
+  var n=$("note"); if(n) S.note=n.value;
+  if(a==="back"){ if(S.step>1) S.step=(S.step===7?6:S.step-1); }
+  else if(a==="go"){ S.step=parseInt(v); }
+  else if(a==="set"){ S[k]=v; }
+  else if(a==="hunger"){ S.hunger=parseInt(v); }
+  else if(a==="water"){ toast("Great — stay hydrated 💧"); S.step=6; }
+  else if(a==="notme"){ toast("OK, let's adjust"); S.step=1; }
+  else if(a==="qty"){ var it=S.items[parseInt(k)]; it.q=Math.max(1,it.q+parseInt(v)); }
+  else if(a==="pick"){ S.pick=parseInt(v); toast("Now tap a swap item below"); }
+  else if(a==="swap"){ if(S.pick<0){ toast("Tap ⇄ on a row first"); return; } S.items[S.pick].id=v; S.pick=-1; }
+  else if(a==="tg"){ var i=S.show.indexOf(v); if(i>=0) S.show.splice(i,1); else if(S.show.length<3) S.show.push(v); else toast("Pick up to 3 only"); }
+  else if(a==="reset"){ S.items=defItems(); S.pick=-1; S.show=[]; }
+  else if(a==="confirm"){ toast("Added to mock list ✅"); S.step=6; }
+  else if(a==="save"){ toast("Note saved"); S.step=7; }
+  else if(a==="skip"){ S.note=""; S.step=7; }
+  else if(a==="restart"){ S.step=1; S.items=defItems(); S.pick=-1; S.show=[]; S.note=""; S.feel="About right"; }
+  render();
+});
+render();
+</script>
+</body>
+</html>
