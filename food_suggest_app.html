@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>After Exercise Snack Prototype</title>
+<title>After Exercise Snack Prototype (v2: guess first)</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif}
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6a11cb,#2575fc 50%,#ff6ec4);padding:16px}
@@ -62,6 +62,17 @@ textarea{width:100%;height:90px;border-radius:14px;border:2px solid #e0e3f5;padd
 .toast.show{opacity:1}
 .fade{animation:f .35s}@keyframes f{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 .done{text-align:center;padding-top:60px}.done .big{font-size:80px}
+.ask{background:linear-gradient(135deg,#e0f7fa,#f3e5f5);text-align:left}
+.ask h3{font-size:17px;color:#4a148c;margin-bottom:6px}
+.ask p{font-size:12px;color:#555}
+.cmp{display:flex;gap:8px;margin:8px 0}
+.cmp div{flex:1;border-radius:14px;padding:10px;font-size:12px;text-align:center}
+.cmp .you{background:#e3f2fd;color:#0d47a1}.cmp .ai{background:#fff3e0;color:#e65100}
+.cmp b{display:block;font-size:14px;margin-top:3px}
+.verdict{font-size:12px;padding:8px 10px;border-radius:10px;margin-bottom:8px}
+.v-ok{background:#e8f5e9;color:#1b5e20}.v-diff{background:#fff8e1;color:#8d6e00}
+.miss{font-size:11px;color:#6a1b9a;background:#f3e5f5;border-radius:10px;padding:8px;margin-bottom:8px}
+.conf{font-size:11px;color:#555;margin-top:6px}
 </style>
 </head>
 <body>
@@ -86,7 +97,7 @@ var CAT = {
 var NUT = {P:"Protein",C:"Carbs",F:"Fat",S:"Sugar"};
 function defItems(){return [{id:"yogurt",q:1},{id:"banana",q:1},{id:"bread",q:1}];}
 var S = {step:1,act:"Gym",dur:"30",int:"Medium",since:"15–30m",now:"Before 9 pm",hunger:3,
-         items:defItems(),pick:-1,show:[],feel:"About right",note:""};
+         items:defItems(),pick:-1,show:[],feel:"About right",note:"",guess:null};
 
 function $(id){return document.getElementById(id);}
 function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -104,9 +115,13 @@ function totals(){
 }
 function advice(){
   var heavy = S.int==="High" || parseInt(S.dur)>=45;
-  if(S.hunger<=2 && !heavy) return {t:"Water may be enough",d:"Short, easy session and low hunger."};
-  return {t:"A light snack may help, or water may be enough",d:heavy?"Longer or harder effort — protein + carbs can help.":"Moderate effort and some hunger."};
+  if(S.hunger<=2 && !heavy) return {kind:"water",t:"Water may be enough",d:"Short, easy session and low hunger.",conf:"Fairly clear case"};
+  var conflict = (S.hunger<=2 && heavy);
+  return {kind:"snack",t:"A light snack may help, or water may be enough",
+          d:heavy?"Longer or harder effort — protein + carbs can help.":"Moderate effort and some hunger.",
+          conf:conflict?"Low — your inputs point in different directions":"Medium — simple rule, sample data"};
 }
+function guessLabel(g){return g==="water"?"Just water":g==="snack"?"A light snack":"Not sure";}
 
 function render(){
   $("dots").innerHTML=[1,2,3,4,5,6].map(function(i){return '<div class="dot'+(i<=S.step?' on':'')+'">'+i+'</div>';}).join("");
@@ -122,24 +137,44 @@ function render(){
       '<h4>Hunger level</h4><div class="hunger">'+[1,2,3,4,5].map(function(i){
         return '<button class="h'+(S.hunger===i?' sel':'')+'" data-a="hunger" data-v="'+i+'">'+i+'</button>';}).join("")+
       '</div><div class="hl"><span>Not hungry</span><span>Very hungry</span></div>';
-    ft='<button class="btn p" data-a="go" data-v="2">CONTINUE</button>';
+    ft='<button class="btn p" data-a="start">CONTINUE</button>';
+  }
+  else if(S.step===2 && S.guess===null){
+    h='<h1>Your guess first</h1>'+
+      '<div class="card ask"><h3>Before you see a suggestion: what do you think you need?</h3>'+
+      '<p>Take a moment. Your own feeling counts. You can change your mind after seeing the suggestion.</p></div>'+
+      '<div class="chips"><button class="chip" data-a="guess" data-v="water">💧 Just water</button>'+
+      '<button class="chip" data-a="guess" data-v="snack">🍌 A light snack</button>'+
+      '<button class="chip" data-a="guess" data-v="unsure">🤷 Not sure</button></div>'+
+      '<div class="why" style="margin-top:12px"><b>What this tool can do:</b> compare your 5 answers with a simple sample rule and suggest water or a light snack.<br>'+
+      '<b>What it cannot do:</b> it does not know your health, allergies or what you ate earlier, and it is not nutritional advice.</div>';
+    ft='<button class="link" data-a="skipguess">Skip, just show me the suggestion</button>';
   }
   else if(S.step===2){
     var a=advice();
+    var g=S.guess, verdict="";
+    if(g==="water"||g==="snack"){
+      verdict = (g===a.kind)
+        ? '<div class="verdict v-ok">✔ Your guess and the suggestion agree. It is still your decision.</div>'
+        : '<div class="verdict v-diff">⚠ Your guess is different from the suggestion. Neither is "wrong". Check the reason below and decide.</div>';
+    }
     h='<h1>Today\'s check</h1>'+
+      (g?'<div class="cmp"><div class="you">You said<b>'+guessLabel(g)+'</b></div><div class="ai">Suggestion<b>'+(a.kind==="water"?"Water":"Light snack / water")+'</b></div></div>'+verdict:'')+
       '<div class="card rec"><small>RECOMMENDATION</small><h3>AI-assisted suggestion (sample)</h3><h3 style="font-size:16px">'+a.t+'</h3>'+
-      '<p>Based on: '+esc(S.dur)+' min, '+S.int.toLowerCase()+' effort, hunger '+S.hunger+' of 5. '+a.d+'</p></div>'+
-      '<div class="card time"><div class="pulse"></div><div>Time since exercise<br><b>'+esc(S.since)+'</b> · '+esc(S.now)+'</div></div>'+
-      '<div class="hero">🏃‍♂️💧</div>';
+      '<p>Based on: '+esc(S.dur)+' min, '+S.int.toLowerCase()+' effort, hunger '+S.hunger+' of 5. '+a.d+'</p>'+
+      '<p class="conf"><b>Confidence:</b> '+a.conf+'</p></div>'+
+      '<div class="miss"><b>What might this miss?</b> Allergies, health conditions, and what you ate earlier today. If any of these matter to you, trust your own judgement.</div>'+
+      '<div class="card time"><div class="pulse"></div><div>Time since exercise<br><b>'+esc(S.since)+'</b> · '+esc(S.now)+'</div></div>';
     ft='<div class="btnrow"><button class="btn p" data-a="go" data-v="3">Show food ideas</button><button class="btn s" data-a="water">Water is enough for me</button></div>'+
        '<button class="btn s" data-a="go" data-v="1">ADJUST MANUALLY</button>';
   }
   else if(S.step===3){
+    var hasBread=S.items.some(function(i){return i.id==="bread";});
     h='<h1>Suggested combination</h1><p style="font-size:11px;color:#888;margin-bottom:6px">Sample combination — adjust anytime.</p>'+
       S.items.map(function(i){var c=CAT[i.id];
         return '<div class="row"><div class="em" style="background:'+c.c+'">'+c.e+'</div><div class="nm">'+c.n+'<small>'+i.q+' × '+c.u+'</small></div><div class="pr">HK$'+(c.pr*i.q)+'</div></div>';}).join("")+
       '<div class="tot"><span>Total</span><span style="color:#e0245e">HK$'+t.pr+'</span></div>'+
-      '<div class="why">Why: adds bread so it feels more filling than yogurt and banana alone.</div>'+
+      '<div class="why">Why: '+(hasBread?'adds bread so it feels more filling than yogurt and banana alone.':'this is your edited combination; the original reason no longer applies.')+'</div>'+
       '<h4>Trade-offs</h4><div class="grid"><div class="tag t0">Fullness: '+((t.C+t.P)>50?'High':'Medium')+'</div><div class="tag t1">Protein: '+t.P+'g</div><div class="tag t2">Carbs: '+t.C+'g</div><div class="tag t3">Fat: '+t.F+'g</div></div>'+
       '<div class="hero" style="background:linear-gradient(135deg,#f6d365,#fda085)">'+S.items.map(function(i){return CAT[i.id].e;}).join(" ")+'</div>';
     ft='<button class="btn p" data-a="go" data-v="5">LOOKS GOOD</button><button class="btn s" data-a="go" data-v="4">EDIT</button><button class="link" data-a="notme">Not for me</button>';
@@ -183,7 +218,13 @@ document.getElementById("phone").addEventListener("click",function(e){
   var el=e.target.closest("[data-a]"); if(!el) return;
   var a=el.getAttribute("data-a"), v=el.getAttribute("data-v"), k=el.getAttribute("data-k");
   var n=$("note"); if(n) S.note=n.value;
-  if(a==="back"){ if(S.step>1) S.step=(S.step===7?6:S.step-1); }
+  if(a==="back"){
+    if(S.step===2 && S.guess!==null){ S.guess=null; }
+    else if(S.step>1){ S.step=(S.step===7?6:S.step-1); if(S.step===2){ S.guess=S.guess; } }
+  }
+  else if(a==="start"){ S.guess=null; S.step=2; }
+  else if(a==="guess"){ S.guess=v; }
+  else if(a==="skipguess"){ S.guess="unsure"; }
   else if(a==="go"){ S.step=parseInt(v); }
   else if(a==="set"){ S[k]=v; }
   else if(a==="hunger"){ S.hunger=parseInt(v); }
@@ -197,7 +238,7 @@ document.getElementById("phone").addEventListener("click",function(e){
   else if(a==="confirm"){ toast("Added to mock list ✅"); S.step=6; }
   else if(a==="save"){ toast("Note saved"); S.step=7; }
   else if(a==="skip"){ S.note=""; S.step=7; }
-  else if(a==="restart"){ S.step=1; S.items=defItems(); S.pick=-1; S.show=[]; S.note=""; S.feel="About right"; }
+  else if(a==="restart"){ S.step=1; S.guess=null; S.items=defItems(); S.pick=-1; S.show=[]; S.note=""; S.feel="About right"; }
   render();
 });
 render();
